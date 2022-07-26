@@ -1,0 +1,132 @@
+﻿<Window x:Class="FlWatcherDesktop.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:FlWatcherDesktop.ViewModels"
+        xmlns:icons="http://metro.mahapps.com/winfx/xaml/iconpacks"
+        xmlns:beh="http://schemas.microsoft.com/xaml/behaviors"
+        mc:Ignorable="d"
+        d:DataContext="{d:DesignInstance Type=vm:MainWindowViewModel, IsDesignTimeCreatable=True}"
+        Title="Bandicamp Watcher" Height="300" Width="600">
+    <beh:Interaction.Triggers>
+        <beh:EventTrigger EventName="Loaded">
+            <beh:InvokeCommandAction Command="{Binding LoadedCommand}"/>
+        </beh:EventTrigger>
+    </beh:Interaction.Triggers>
+    <Window.Resources>
+        <Style TargetType="Button">
+                <Setter Property="Margin" Value="2 2 4 2"/>
+                <Setter Property="Padding" Value="2"/>
+                <Setter Property="Foreground" Value="Navy"/>
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="BorderBrush" Value="Transparent"/>
+            </Style>
+        <Style TargetType="{x:Type icons:PackIconFontAwesome}">
+            <Setter Property="Width" Value="22"/>
+            <Setter Property="Height" Value="22"/>
+            <Setter Property="Foreground" Value="Navy"/>
+        </Style>
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="2" Background="#FAECEC">
+            <Button Command="{Binding EnterToAccountCommand}">
+                <icons:PackIconFontAwesome Kind="DoorClosedSolid"/>
+            </Button>
+            <Button Command="{Binding StartWatchingCommand}">
+                <icons:PackIconFontAwesome Kind="PlayCircleRegular"/>
+            </Button>
+            <Button Command="{Binding StopWatchingCommang}">
+                <icons:PackIconFontAwesome Kind="StopCircleRegular"/>
+            </Button>
+        </StackPanel>
+
+        <Grid Grid.Row="1" Margin="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Grid.Column="0" Text="Ключевые фразы для поиска" VerticalAlignment="Center" />
+            <TextBlock Grid.Column="1" Text="Новая фраза" VerticalAlignment="Center" FontWeight="Bold" Margin="10 2" />
+            <TextBox Grid.Column="2" Width="100" Text="{Binding NewKeyPhrase}" BorderThickness="0 0 0 1" Height="24" Margin="6 2 0 2" />
+            <Button Grid.Column="3" Command="{Binding AddKeyPhraseCommand}">
+                <icons:PackIconFontAwesome Kind="PlusCircleSolid" Width="24" Height="24" Foreground="LawnGreen" Margin="2"/>
+            </Button>
+            
+            <ListBox Grid.Row="1" Grid.ColumnSpan="4" 
+                     BorderBrush="Transparent"
+                     Background="LightGray"
+                     ItemsSource="{Binding KeyPhrases}" >
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Border Background="Blue" Margin="6" Padding="3" BorderThickness="1" BorderBrush="White" CornerRadius="4">
+                            <TextBlock Text="{Binding}" FontWeight="Bold" Foreground="White" Margin="8 4" />
+                        </Border>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+                <ListBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal" IsItemsHost="True"/>
+                    </ItemsPanelTemplate>
+                </ListBox.ItemsPanel>
+            </ListBox>
+        </Grid>
+
+        <Grid Grid.Row="2" 
+              Background="LightYellow" 
+              Margin="2">
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <TextBlock Text="Найденные проекты"                       
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center" 
+                       FontSize="16" 
+                       FontWeight="Bold"
+                       Foreground="Navy" 
+                       Margin="8"/>
+            <ItemsControl Grid.Row="1" ItemsSource="{Binding Projects}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Grid.Column="0" Text="{Binding Created}" Margin="4" Foreground="Blue"/>
+                            <Button Grid.Column="1" Command="{Binding OpenInBrowserCommand}">
+                                <icons:PackIconFontAwesome Kind="LinkSolid" Foreground="Navy" Width="20" Height="20" Margin="2"/>
+                            </Button>
+                            <TextBlock Grid.Column="2" Text="{Binding Title}" FontWeight="Bold" Margin="4" />
+                            <TextBlock Grid.Column="3" Text="{Binding PriceString}" Margin="4" Foreground="Red"/>
+                            <TextBlock Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="3" Text="{Binding Description}" />
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </Grid>
+
+    </Grid>
+</Window>
