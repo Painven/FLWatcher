@@ -10,9 +10,10 @@ public class FlProjectViewModel : ViewModelBase
     public string Uri { get; init; }
     public string Title { get; init; }
     public string Description { get; init; }
-    public DateTime Created { get; init; }
+    public DateTime Created { get; init; } 
     public string PriceString { get; init; }
 
+    public string [] Tags { get; init; }
     public ICommand OpenInBrowserCommand { get; }
 
     public FlProjectViewModel()
@@ -22,10 +23,10 @@ public class FlProjectViewModel : ViewModelBase
 
     private void OpenInBrowser(object o)
     {
-        Process.Start(Uri);
+        Process.Start("explorer", Uri);
     }
 
-    public static FlProjectViewModel FromModel(FLProjectItem e)
+    public static FlProjectViewModel FromModel(FLProjectItem e, string [] tags)
     {
         return new FlProjectViewModel()
         {
@@ -34,7 +35,8 @@ public class FlProjectViewModel : ViewModelBase
             Id = e.Id,
             PriceString = e.PriceString,
             Title = e.Title,
-            Uri = e.Uri
+            Uri = e.Uri,
+            Tags = tags
         };
     }
 }

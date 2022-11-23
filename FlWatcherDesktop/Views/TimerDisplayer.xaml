@@ -1,0 +1,34 @@
+﻿<UserControl x:Class="FlWatcherDesktop.Views.TimerDisplayer"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:FlWatcherDesktop.Views"
+             mc:Ignorable="d" 
+             d:Background="White"
+             d:DesignHeight="100" d:DesignWidth="100">
+    <Canvas >
+
+        <Ellipse Fill="Black" Width="100" Height="100" />
+        <Line
+            X1="50" Y1="50"
+            X2="50" Y2="0"
+            x:Name="line"
+            Stroke="#9B4343"
+            StrokeThickness="2">
+
+            <Line.Resources>
+                <Storyboard x:Key="spin">
+                    <DoubleAnimation x:Name="da" 
+                             Storyboard.TargetName="TransRotate" 
+                             Storyboard.TargetProperty="Angle"
+                             By="360" 
+                             Duration="0:1:0"  
+                             AutoReverse="false" 
+                             RepeatBehavior="Forever" />
+                </Storyboard>
+            </Line.Resources>
+        </Line>
+
+    </Canvas>
+</UserControl>

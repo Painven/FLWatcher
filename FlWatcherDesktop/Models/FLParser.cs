@@ -9,7 +9,7 @@ using System.Timers;
 
 namespace FlWatcherDesktop.ViewModels;
 
-public class FLParser : ViewModelBase
+public class FLParser
 {
     const string HOST = "https://www.fl.ru";
 
@@ -18,18 +18,27 @@ public class FLParser : ViewModelBase
     private readonly Dictionary<string, FLProjectItem> loadedProjects;
 
     public event EventHandler<FLProjectItem> OnProjectFound;
+    public event Action RunStatusChanged;
 
     bool isRunning;
     public bool IsRunning
     {
         get => isRunning;
-        private set
+        set
         {
-            if(Set(ref isRunning, value))
+            if(isRunning != value)
             {
+                isRunning = value;
+                RunStatusChanged?.Invoke();
                 timer.Enabled = value;
             }
         }
+    }
+
+    public TimeSpan Interval
+    {
+        get => TimeSpan.FromMilliseconds(timer.Interval);
+        set => timer.Interval = (int)value.TotalMilliseconds;
     }
 
     public FLParser()
@@ -61,9 +70,14 @@ public class FLParser : ViewModelBase
 
     private async void Timer_Elapsed(object? sender, ElapsedEventArgs e)
     {
+        await RefreshNow();
+    }
+
+    public async Task RefreshNow()
+    {
         var lastProjects = await GetProjects();
 
-        foreach(var p in lastProjects)
+        foreach (var p in lastProjects)
         {
             if (!string.IsNullOrWhiteSpace(p.Id) && !loadedProjects.ContainsKey(p.Id))
             {
@@ -71,7 +85,6 @@ public class FLParser : ViewModelBase
                 loadedProjects[p.Id] = p;
             }
         }
-
     }
 
     private async Task<FLProjectItem[]> GetProjects()
@@ -87,8 +100,9 @@ public class FLParser : ViewModelBase
                 {
                     Title = div.SelectSingleNode(".//a[@name]")?.InnerText.Trim(),
                     Uri = HOST + div.SelectSingleNode(".//a[@name]")?.GetAttributeValue("href", null),
-                    Description =  div.SelectSingleNode(".//div[@class='b-post__txt ']")?.InnerText.Trim(),
+                    //Description =  div.SelectSingleNode("./div[1]/div[2]/div[1]")?.InnerText.Trim(),
                     Id = div.GetAttributeValue("id", String.Empty),
+                    PriceString = div.SelectSingleNode("./div[1]/div[1]")?.InnerText.Trim()
                 })
                 .ToArray();
 
@@ -102,10 +116,10 @@ public class FLParser : ViewModelBase
         return Enumerable.Empty<FLProjectItem>().ToArray();
     }
 
-    public void Start()
+    public async Task Start()
     {
         IsRunning = true;
-        Timer_Elapsed(this, null);
+        await RefreshNow();
     }
 
     public void Stop()

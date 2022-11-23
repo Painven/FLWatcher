@@ -6,48 +6,81 @@
         xmlns:vm="clr-namespace:FlWatcherDesktop.ViewModels"
         xmlns:icons="http://metro.mahapps.com/winfx/xaml/iconpacks"
         xmlns:beh="http://schemas.microsoft.com/xaml/behaviors"
+        xmlns:ss="clr-namespace:LoadingSpinnerControl;assembly=LoadingSpinnerControl"
+        xmlns:v="clr-namespace:FlWatcherDesktop.Views"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=vm:MainWindowViewModel, IsDesignTimeCreatable=True}"
-        Title="Bandicamp Watcher" Height="300" Width="600">
+        Title="FL.ru парсер" Height="424" Width="849">
+    <Window.Background>
+        <ImageBrush ImageSource="/Assets/granite-2.jpg" 
+                    ViewportUnits="Absolute"
+                    TileMode="FlipY"
+                    Viewport="0,0,200,200"
+                    />
+    </Window.Background>
     <beh:Interaction.Triggers>
         <beh:EventTrigger EventName="Loaded">
             <beh:InvokeCommandAction Command="{Binding LoadedCommand}"/>
         </beh:EventTrigger>
     </beh:Interaction.Triggers>
     <Window.Resources>
-        <Style TargetType="Button">
-                <Setter Property="Margin" Value="2 2 4 2"/>
-                <Setter Property="Padding" Value="2"/>
-                <Setter Property="Foreground" Value="Navy"/>
-                <Setter Property="Background" Value="Transparent"/>
-                <Setter Property="BorderBrush" Value="Transparent"/>
-            </Style>
+
         <Style TargetType="{x:Type icons:PackIconFontAwesome}">
             <Setter Property="Width" Value="22"/>
             <Setter Property="Height" Value="22"/>
             <Setter Property="Foreground" Value="Navy"/>
         </Style>
     </Window.Resources>
+
     <Grid>
+        <Grid.Background>
+            <SolidColorBrush Color="White" Opacity="0.65"/>
+        </Grid.Background>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
+        <Grid.Resources>
+            <Style TargetType="{x:Type icons:PackIconFontAwesome}">
+                <Setter Property="Width" Value="40" />
+                <Setter Property="Height" Value="40" />
+            </Style>
+        </Grid.Resources>
 
-        <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="2" Background="#FAECEC">
-            <Button Command="{Binding EnterToAccountCommand}">
-                <icons:PackIconFontAwesome Kind="DoorClosedSolid"/>
-            </Button>
-            <Button Command="{Binding StartWatchingCommand}">
-                <icons:PackIconFontAwesome Kind="PlayCircleRegular"/>
-            </Button>
-            <Button Command="{Binding StopWatchingCommang}">
-                <icons:PackIconFontAwesome Kind="StopCircleRegular"/>
-            </Button>
-        </StackPanel>
+        <Border Grid.Row="0" BorderThickness="0 0 0 1" BorderBrush="#B62B2B" Margin="0 2 0 8">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Orientation="Horizontal">
+                    <Button Command="{Binding RefreshNowCommand}">
+                        <icons:PackIconFontAwesome Kind="CloudDownloadAltSolid"/>
+                    </Button>
+                    <Button Command="{Binding StartWatchingCommand}">
+                        <icons:PackIconFontAwesome Kind="PlayCircleRegular"/>
+                    </Button>
+                    <Button Command="{Binding StopWatchingCommand}">
+                        <icons:PackIconFontAwesome Kind="StopCircleRegular"/>
+                    </Button>
+                </StackPanel>
 
-        <Grid Grid.Row="1" Margin="2">
+                <StackPanel Orientation="Horizontal" Grid.Column="1" HorizontalAlignment="Right">
+                    <TextBlock VerticalAlignment="Center">
+                        <Run>Интервал обновления</Run>
+                        <Run Text="{Binding RefreshIntervalInMinutes}"/>
+                        <Run>(минут)</Run>
+                    </TextBlock>
+                    <Slider Minimum="3" Maximum="60" Value="{Binding RefreshIntervalInMinutes, UpdateSourceTrigger=PropertyChanged}"
+                            Height="24" Width="200" Margin="12 2 6 2"/>
+                    <!-- <v:TimerDisplayer Width="100" Height="100" />-->
+                </StackPanel>
+            </Grid>
+
+        </Border>
+
+        <Grid Grid.Row="1" Margin="2" >
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
@@ -61,46 +94,90 @@
 
             <TextBlock Grid.Column="0" Text="Ключевые фразы для поиска" VerticalAlignment="Center" />
             <TextBlock Grid.Column="1" Text="Новая фраза" VerticalAlignment="Center" FontWeight="Bold" Margin="10 2" />
-            <TextBox Grid.Column="2" Width="100" Text="{Binding NewKeyPhrase}" BorderThickness="0 0 0 1" Height="24" Margin="6 2 0 2" />
-            <Button Grid.Column="3" Command="{Binding AddKeyPhraseCommand}">
-                <icons:PackIconFontAwesome Kind="PlusCircleSolid" Width="24" Height="24" Foreground="LawnGreen" Margin="2"/>
+            <TextBox Grid.Column="2" Width="100" 
+                     Background="Transparent"
+                     BorderBrush="Navy"
+                     Text="{Binding NewKeyPhrase}" BorderThickness="0 0 0 1" Height="24" Margin="6 2 0 2" />
+            <Button Grid.Column="3" Command="{Binding AddKeyPhraseCommand}" >
+                <icons:PackIconFontAwesome Kind="PlusCircleSolid" Width="24" Height="24"  Margin="2"/>
             </Button>
-            
-            <ListBox Grid.Row="1" Grid.ColumnSpan="4" 
+
+            <ItemsControl Grid.Row="1" Grid.ColumnSpan="4" 
+                     Background="Transparent"
                      BorderBrush="Transparent"
-                     Background="LightGray"
-                     ItemsSource="{Binding KeyPhrases}" >
-                <ListBox.ItemTemplate>
+                     ItemsSource="{Binding OrderedKeyPhrases}" >
+                <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Border Background="Blue" Margin="6" Padding="3" BorderThickness="1" BorderBrush="White" CornerRadius="4">
-                            <TextBlock Text="{Binding}" FontWeight="Bold" Foreground="White" Margin="8 4" />
+                        <Border BorderBrush="LightGray" 
+                                Background="#732A1188"
+                                CornerRadius="6" Margin="2" Padding="4">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Text="{Binding Phrase}" 
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           FontWeight="Bold" 
+                                           FontSize="14"
+                                           Foreground="White" 
+                                           Grid.Column="0" />
+
+                                <Border Grid.Column="1" CornerRadius="20" BorderThickness="1" BorderBrush="White"
+                                                Margin="4 2 8 2" Width="18" Height="18"
+                                                VerticalAlignment="Center"
+                                                HorizontalAlignment="Center">
+                                    <TextBlock Text="{Binding TagsCount}"
+                                                       VerticalAlignment="Center"
+                                                       HorizontalAlignment="Center"
+                                                       Foreground="White"
+                                                       FontSize="10"/>
+                                </Border>
+                                <Button Grid.Column="2" Margin="2" Command="{Binding RemovePhraseCommand}" 
+                                        VerticalContentAlignment="Center"
+                                        VerticalAlignment="Center">
+
+                                    <icons:PackIconFontAwesome Kind="TimesSolid" 
+                                                                   VerticalAlignment="Center"
+                                                                   Width="8" Height="8"/>
+
+                                </Button>
+                            </Grid>
                         </Border>
                     </DataTemplate>
-                </ListBox.ItemTemplate>
-                <ListBox.ItemsPanel>
+                </ItemsControl.ItemTemplate>
+                <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
-                        <StackPanel Orientation="Horizontal" IsItemsHost="True"/>
+                        <WrapPanel IsItemsHost="True"/>
                     </ItemsPanelTemplate>
-                </ListBox.ItemsPanel>
-            </ListBox>
+                </ItemsControl.ItemsPanel>
+            </ItemsControl>
         </Grid>
 
         <Grid Grid.Row="2" 
-              Background="LightYellow" 
               Margin="2">
 
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
-            <TextBlock Text="Найденные проекты"                       
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="5*"/>
+                <ColumnDefinition Width="3*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="Найденные проекты"    
+                       Grid.Column="0"
                        HorizontalAlignment="Center"
                        VerticalAlignment="Center" 
                        FontSize="16" 
                        FontWeight="Bold"
                        Foreground="Navy" 
                        Margin="8"/>
-            <ItemsControl Grid.Row="1" ItemsSource="{Binding Projects}">
+
+            <ItemsControl Grid.Row="1" ItemsSource="{Binding Projects}" Margin="2" Background="#33000000">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <Grid>
@@ -110,22 +187,61 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                            </Grid.RowDefinitions>
 
-                            <TextBlock Grid.Column="0" Text="{Binding Created}" Margin="4" Foreground="Blue"/>
-                            <Button Grid.Column="1" Command="{Binding OpenInBrowserCommand}">
+                            <Button Grid.Column="0" Command="{Binding OpenInBrowserCommand}">
                                 <icons:PackIconFontAwesome Kind="LinkSolid" Foreground="Navy" Width="20" Height="20" Margin="2"/>
                             </Button>
-                            <TextBlock Grid.Column="2" Text="{Binding Title}" FontWeight="Bold" Margin="4" />
-                            <TextBlock Grid.Column="3" Text="{Binding PriceString}" Margin="4" Foreground="Red"/>
-                            <TextBlock Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="3" Text="{Binding Description}" />
+
+                            <TextBlock Grid.Column="1"
+                                       Margin="4 2"
+                                       VerticalAlignment="Center" Text="{Binding Created, StringFormat={}dd.MM.yyyy HH:mm, ConverterCulture=ru-RU}" 
+                                       Foreground="#5424B0"
+                                       FontSize="11"/>
+
+                            <TextBlock Grid.Column="2" Text="{Binding Title}" 
+                                       VerticalAlignment="Center"
+                                       FontWeight="Bold" Margin="4" />
+
+                            <ItemsControl Grid.Column="3" ItemsSource="{Binding Tags}" VerticalAlignment="Center">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Margin="2" Padding="8 4" CornerRadius="4" 
+                                                BorderBrush="Red" Background="#99000080">
+                                            <TextBlock Text="{Binding}" Foreground="White"/>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Horizontal" IsItemsHost="True"></StackPanel>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                            </ItemsControl>
+                            
                         </Grid>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
+            <ss:LoadingSpinner IsEnabled="True" IsLoading="True" Width="64" Height="64" Panel.ZIndex="99" 
+                               Visibility="{Binding IsRefreshing, Converter={StaticResource BoolToVisibilityConverter}}"
+                               HorizontalAlignment="Stretch"
+                               VerticalAlignment="Stretch"
+                               HorizontalContentAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Grid.Row="1" Grid.Column="0" Background="Blue" Color="Blue"
+                               Foreground="Blue" Thickness="4"/>
+
+            <TextBlock Text="Журнал событий"    
+                       Grid.Column="1"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center" 
+                       FontSize="16" 
+                       FontWeight="Bold"
+                       Foreground="Navy" 
+                       Margin="8"/>
+
+            <ListBox Grid.Column="2" Grid.Row="1" Margin="2" Background="#33000000" ItemsSource="{Binding Logs}">
+            </ListBox>
         </Grid>
 
     </Grid>
